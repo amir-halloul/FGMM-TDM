@@ -17,15 +17,17 @@ namespace FGMM.Gamemode.TDM.Client
         private Logger Logger { get; set; }
         private IEventManager Events { get; set; }
         private IRpcHandler Rpc { get; set; }
+        private ITickManager TickManager { get; set; }
 
         GameService GameService;
 
-        public TDM(Logger logger, IEventManager events, IRpcHandler rpc)
+        public TDM(Logger logger, IEventManager events, IRpcHandler rpc, ITickManager tickManager)
         {
             Logger = logger;
             Events = events;
             Rpc = rpc;
-            GameService = new GameService(new Logger("TDM | GameService"), Events, Rpc);
+            TickManager = tickManager;
+            GameService = new GameService(new Logger("TDM | GameService"), Events, Rpc, TickManager);
         }
 
         public void Start()

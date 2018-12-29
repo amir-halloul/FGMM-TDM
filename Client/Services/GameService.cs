@@ -20,9 +20,8 @@ namespace FGMM.Gamemode.TDM.Client.Services
     {
         private const int RespawnTime = 5000; // Time before respawning in ms
         private int RemainingTime = 0;
-        private Timer MissionTimer;
 
-        public GameService(ILogger logger, IEventManager events, IRpcHandler rpc) : base(logger, events, rpc)
+        public GameService(ILogger logger, IEventManager events, IRpcHandler rpc, ITickManager tickManager) : base(logger, events, rpc, tickManager)
         {
             Logger.Info("Game service started.");
 
@@ -32,7 +31,17 @@ namespace FGMM.Gamemode.TDM.Client.Services
             Rpc.Event(TDMEvents.Respawn).On(OnRespawnRequested);
             Rpc.Event(ServerEvents.MissionEnded).On(OnMissionEnded);
 
-            MissionTimer = new Timer(MissionTimerTick, null, 0, 1000);
+            tickManager.Attach(MissionTimerTick);
+        }
+
+        private async Task MissionTimerTick()
+        {
+            if (RemainingTime > 0)
+            {
+                RemainingTime--;
+                UpdateTime(RemainingTime);
+            }
+            await BaseScript.Delay(1000);
         }
 
         private void OnMissionEnded(IRpcEvent obj)
@@ -50,15 +59,6 @@ namespace FGMM.Gamemode.TDM.Client.Services
         private async void OnSpawnRequested(IRpcEvent rpc, SpawnData data)
         {
             await SpawnPlayer(data);
-        }
-
-        private void MissionTimerTick(object state)
-        {
-            if (RemainingTime > 0)
-            {
-                RemainingTime--;
-                UpdateTime(RemainingTime);
-            }
         }
 
         private void OnTimerUpdated(IRpcEvent rpc, int time)
@@ -144,7 +144,6 @@ namespace FGMM.Gamemode.TDM.Client.Services
 
         private async void UpdateTime(int seconds)
         {
-            await BaseScript.Delay(0);
             Serializer serializer = new Serializer();
             Dictionary<string, object> message = new Dictionary<string, object>()
             {

@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{3E39C36D-90C0-4363-A465-7718BA2153B2}</ProjectGuid>
+    <ProjectGuid>{8AFFD348-8745-43F8-A108-7E443DC1912F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FGMM.Gamemode.TDM.Server</RootNamespace>
-    <AssemblyName>FGMM.Gamemode.TDM.Server.net</AssemblyName>
+    <RootNamespace>FGMM.Gamemode.TDM.Client</RootNamespace>
+    <AssemblyName>FGMM.Gamemode.TDM.Client.net</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -32,16 +32,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="CitizenFX.Core">
-      <HintPath>..\..\..\..\FGMM\citizen\clr2\lib\mono\4.5\CitizenFX.Core.dll</HintPath>
+      <HintPath>..\..\..\..\Users\Amir\AppData\Local\FiveM\FiveM.app\citizen\clr2\lib\mono\4.5\CitizenFX.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="FGMM.SDK.Client.net">
+      <HintPath>..\..\..\..\FGMM\resources\fgmm\FGMM.SDK.Client.net.dll</HintPath>
     </Reference>
     <Reference Include="FGMM.SDK.Core.net">
       <HintPath>..\..\..\..\FGMM\resources\fgmm\FGMM.SDK.Core.net.dll</HintPath>
-    </Reference>
-    <Reference Include="FGMM.SDK.Gamemodes.net">
-      <HintPath>..\..\..\..\FGMM\resources\fgmm\FGMM.SDK.Gamemodes.net.dll</HintPath>
-    </Reference>
-    <Reference Include="FGMM.SDK.Server.net">
-      <HintPath>..\..\..\..\FGMM\resources\fgmm\FGMM.SDK.Server.net.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -53,9 +50,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controllers\GameController.cs" />
-    <Compile Include="Mission.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\GameService.cs" />
     <Compile Include="TDM.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -67,9 +63,5 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy /Y "$(TargetDir)$(TargetName).dll" "C:\FGMM\resources\fgmm\Gamemodes\TDM"</PostBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
   </PropertyGroup>
 </Project>

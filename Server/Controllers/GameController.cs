@@ -97,8 +97,8 @@ namespace FGMM.Gamemode.TDM.Server.Controllers
         {
             if (!IsValidTeamId(team))
                 return false;
-            /*if (!TeamList.CanPlayerJoinTeam(TeamList.Teams[team]))
-                return false;*/
+            if (!TeamList.CanPlayerJoinTeam(TeamList.Teams[team]))
+                return false;
             TeamList.Teams[team].Players.Add(player);
             Rpc.Event(TDMEvents.PlayerAdded).Trigger(int.Parse(player.Handle), team);
             return true;

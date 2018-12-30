@@ -8,5 +8,8 @@
 
         public const string UpdateScore = "fgmm:tdm:ui:update:score";
         public const string UpdateTimer = "fgmm:tdm:ui:update:timer";
+
+        public const string GetPlayerTeam = "fgmm:tdm:player:team";
+        public const string PlayerAdded = "fgmm:tdm:player:team:added";
     }
 }

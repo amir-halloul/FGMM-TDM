@@ -23,6 +23,7 @@ namespace FGMM.Gamemode.TDM.Server.Controllers
         public GameController(ILogger logger, IEventManager events, IRpcHandler rpc) : base(logger, events, rpc)
         {               
             Rpc.Event(TDMEvents.RequestRespawnData).On(OnRespawnDataRequested);
+            Rpc.Event(TDMEvents.GetPlayerTeam).On<int>(OnPlayerTeamRequested);
         }
 
         public void StartMission(Mission mission)
@@ -36,6 +37,18 @@ namespace FGMM.Gamemode.TDM.Server.Controllers
                 t.Name = team.Name;
                 t.Score = 0;
                 TeamList.Teams.Add(t);
+            }
+        }
+
+        private void OnPlayerTeamRequested(IRpcEvent rpc, int playerID)
+        {
+            Player player = new PlayerList()[playerID];
+            if (player == null)
+                rpc.Reply(-1);
+            else
+            {
+                Team team = TeamList.GetPlayerTeam(player);
+                rpc.Reply(TeamList.Teams.IndexOf(team));
             }
         }
 
@@ -84,9 +97,10 @@ namespace FGMM.Gamemode.TDM.Server.Controllers
         {
             if (!IsValidTeamId(team))
                 return false;
-            if (!TeamList.CanPlayerJoinTeam(TeamList.Teams[team]))
-                return false;
+            /*if (!TeamList.CanPlayerJoinTeam(TeamList.Teams[team]))
+                return false;*/
             TeamList.Teams[team].Players.Add(player);
+            Rpc.Event(TDMEvents.PlayerAdded).Trigger(int.Parse(player.Handle), team);
             return true;
         }
 

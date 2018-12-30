@@ -86,7 +86,7 @@ namespace FGMM.Gamemode.TDM.Client.Services
                 }
 
             }
-            await Task.FromResult(0);
+            await BaseScript.Delay(1000);
         }
            
         private async Task BlipTick()
@@ -101,13 +101,17 @@ namespace FGMM.Gamemode.TDM.Client.Services
 
                 // Update player Teams
                 if (!PlayerTeams.ContainsKey(i))
+                {
+                    Blip blip = new Blip(API.GetBlipFromEntity(API.GetPlayerPed(i)));
+                    blip?.Delete();
                     PlayerTeams[i] = await Rpc.Event(TDMEvents.GetPlayerTeam).Request<int>(i);
+                }
+                    
 
                 // Player is not logged in yet
                 if (PlayerTeams[i] == -1)
                 {
-                    Ped ped = new Ped(API.GetPlayerPed(i));
-                    Blip blip = new Blip(API.GetBlipFromEntity(ped.Handle));
+                    Blip blip = new Blip(API.GetBlipFromEntity(API.GetPlayerPed(i)));
                     blip?.Delete();
                     continue;
                 }
@@ -125,7 +129,7 @@ namespace FGMM.Gamemode.TDM.Client.Services
                         playerBlip.Color = BlipColor.Blue;
                 }
             }
-            await Task.FromResult(0);
+            await BaseScript.Delay(1000);
         }
     }
 }

@@ -30,7 +30,7 @@ namespace FGMM.Gamemode.TDM.Client
             TickManager = tickManager;
             GameService = new GameService(new Logger("TDM | GameService"), Events, Rpc, TickManager);
             PlayerBlipsService = new PlayerBlipsService(new Logger("TDM | PlayerBlips"), Events, Rpc, TickManager);
-            //LeaderboardService leaderboardService = new LeaderboardService(new Logger("TDM | leaderBoard"), Events, Rpc, TickManager);
+            LeaderboardService leaderboardService = new LeaderboardService(new Logger("TDM | leaderBoard"), Events, Rpc, TickManager);
         }
 
         public void Start()

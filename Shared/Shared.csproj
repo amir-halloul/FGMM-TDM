@@ -45,7 +45,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Events\TDMEvents.cs" />
-    <Compile Include="Moderls\SpawnData.cs" />
+    <Compile Include="Models\Result.cs" />
+    <Compile Include="Models\SpawnData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

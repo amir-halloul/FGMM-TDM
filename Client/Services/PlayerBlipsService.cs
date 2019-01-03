@@ -1,19 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using FGMM.SDK.Client.Events;
 using FGMM.SDK.Client.RPC;
 using FGMM.SDK.Client.Services;
 using FGMM.SDK.Core.Diagnostics;
-using FGMM.SDK.Core.RPC.Events;
-using FGMM.Gamemode.TDM.Shared.Models;
-using FGMM.Gamemode.TDM.Shared.Events;
-using FGMM.SDK.Core.RPC;
 using CitizenFX.Core;
 using CitizenFX.Core.Native;
-using CitizenFX.Core.UI;
-using System.Threading;
-
 
 namespace FGMM.Gamemode.TDM.Client.Services
 {
@@ -39,19 +30,31 @@ namespace FGMM.Gamemode.TDM.Client.Services
 
         private async Task GamerTagTick()
         {
-            for (int i = 0; i < MAX_PLAYERS; i++)
+            foreach(Player player in new PlayerList())
             {
-                if (!API.NetworkIsPlayerActive(i) || API.PlayerId() == i)
+                if (player == Game.Player)
                     continue;
 
-                if (API.GetPlayerTeam(i) == -1)
-                    continue;  
+                int playerTeam = API.GetPlayerTeam(player.Handle);               
+                
+                int gamerTag = API.CreateMpGamerTag(player.Character.Handle, player.Name, false, false, "", 0);
 
-                int gamerTag = API.CreateMpGamerTag(API.GetPlayerPed(i), API.GetPlayerName(i), false, false, "", 0);
-                API.SetMpGamerTagVisibility(gamerTag, 2, true);
+                RaycastResult raycastResult = World.Raycast(Game.PlayerPed.Position, player.Character.Position, IntersectOptions.Map);
+
+                if (raycastResult.DitHit || playerTeam == -1)
+                {
+                    API.SetMpGamerTagVisibility(gamerTag, 0, false);
+                    API.SetMpGamerTagVisibility(gamerTag, 2, false);
+                }
+                else
+                {
+                    API.SetMpGamerTagVisibility(gamerTag, 0, true);
+                    API.SetMpGamerTagVisibility(gamerTag, 2, true);
+                }
+
                 API.SetMpGamerTagAlpha(gamerTag, 2, 255);
 
-                if (API.GetPlayerTeam(i) != API.GetPlayerTeam(Game.Player.Handle))
+                if (playerTeam != API.GetPlayerTeam(Game.Player.Handle))
                 {
                     API.SetMpGamerTagColour(gamerTag, 0, 7);
                     API.SetMpGamerTagHealthBarColor(gamerTag, 7);
@@ -61,34 +64,31 @@ namespace FGMM.Gamemode.TDM.Client.Services
                     API.SetMpGamerTagColour(gamerTag, 0, 10);
                     API.SetMpGamerTagHealthBarColor(gamerTag, 10);
                 }
-
-            }
-            await BaseScript.Delay(1000);
+            }   
+            await BaseScript.Delay(500);
         }
            
         private async Task BlipTick()
         {
-            for (int i = 0; i < MAX_PLAYERS; i++)
+            foreach(Player player in new PlayerList())
             {
-                if (!API.NetworkIsPlayerActive(i) || API.PlayerId() == i)
+                if (player == Game.Player)
                     continue;
-                if(API.GetPlayerTeam(i) == -1)
-                {
-                    Blip blip = new Blip(API.GetBlipFromEntity(API.GetPlayerPed(i)));
-                    blip?.Delete();
-                    continue;
-                }                   
 
-                Ped playerPed = new Ped(API.GetPlayerPed(i));
-                Blip playerBlip = new Blip(API.GetBlipFromEntity(playerPed.Handle));
-                if(playerBlip == null || !playerBlip.Exists()) // Player has no blip
+                int playerTeam = API.GetPlayerTeam(player.Handle);
+
+                Blip blip = new Blip(API.GetBlipFromEntity(player.Character.Handle));
+                blip?.Delete();
+
+                if(playerTeam != -1 && player.IsAlive)
                 {
-                    playerBlip = new Blip(API.AddBlipForEntity(playerPed.Handle));
-                    playerBlip.Sprite = BlipSprite.Enemy;
-                    if (API.GetPlayerTeam(i) != API.GetPlayerTeam(Game.Player.Handle))
-                        playerBlip.Color = BlipColor.Red;
+                    blip = new Blip(API.AddBlipForEntity(player.Character.Handle));
+                    blip.Sprite = BlipSprite.Enemy;
+
+                    if (API.GetPlayerTeam(Game.Player.Handle) == playerTeam)
+                        blip.Color = BlipColor.Blue;
                     else
-                        playerBlip.Color = BlipColor.Blue;
+                        blip.Color = BlipColor.Red;
                 }
             }
             await BaseScript.Delay(1000);

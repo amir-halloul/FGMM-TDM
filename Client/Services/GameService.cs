@@ -20,6 +20,8 @@ namespace FGMM.Gamemode.TDM.Client.Services
     {
         private const int RespawnTime = 5000; // Time before respawning in ms
         private int RemainingTime = 0;
+        private int TimeRecieved;
+        private bool GameRunning = false;
 
         public GameService(ILogger logger, IEventManager events, IRpcHandler rpc, ITickManager tickManager) : base(logger, events, rpc, tickManager)
         {
@@ -29,41 +31,50 @@ namespace FGMM.Gamemode.TDM.Client.Services
             Rpc.Event(TDMEvents.UpdateScore).On<int, int>(OnScoreUpdated);
             Rpc.Event(TDMEvents.UpdateTimer).On<int>(OnTimerUpdated);
             Rpc.Event(TDMEvents.Respawn).On(OnRespawnRequested);
-            Rpc.Event(ServerEvents.MissionEnded).On(OnMissionEnded);
 
             tickManager.Attach(MissionTimerTick);
+        }
+
+        public void Start()
+        {
+            GameRunning = true;
+        }
+
+        public void Stop()
+        {
+            GameRunning = false;
+            ToggleScoreHud(false);
         }
 
         private async Task MissionTimerTick()
         {
             if (RemainingTime > 0)
             {
-                RemainingTime--;
-                UpdateTime(RemainingTime);
+                UpdateTime(RemainingTime - (int)Math.Floor((double)(API.GetGameTimer() - TimeRecieved) / 1000));
             }
             await BaseScript.Delay(1000);
         }
 
-        private void OnMissionEnded(IRpcEvent obj)
-        {
-            ToggleScoreHud(false);
-        }
-
         private async void OnRespawnRequested(IRpcEvent rpc)
         {
-            await Delay(RespawnTime);
+            await BaseScript.Delay(RespawnTime);
+            if (!GameRunning)
+                return;
             SpawnData respawnData = await Rpc.Event(TDMEvents.RequestRespawnData).Request<SpawnData>();
             await SpawnPlayer(respawnData, true);
         }
 
         private async void OnSpawnRequested(IRpcEvent rpc, SpawnData data)
         {
+            if (!GameRunning)
+                return;
             await SpawnPlayer(data);
         }
 
         private void OnTimerUpdated(IRpcEvent rpc, int time)
         {
             RemainingTime = time;
+            TimeRecieved = API.GetGameTimer();
             UpdateTime(RemainingTime);
         }
 
@@ -83,9 +94,10 @@ namespace FGMM.Gamemode.TDM.Client.Services
 
             if (!respawn)
             {
-                while (!await Game.Player.ChangeModel(new Model((PedHash)Enum.Parse(typeof(PedHash), data.Skin, true)))) await BaseScript.Delay(500);
+                while (!await Game.Player.ChangeModel(new Model((PedHash)Enum.Parse(typeof(PedHash), data.Skin, true))))
+                    await BaseScript.Delay(500);
                 API.SetPedDefaultComponentVariation(Game.PlayerPed.Handle);
-            }
+            }               
 
             EquipLoadout(data.Loadout);
 
@@ -98,8 +110,7 @@ namespace FGMM.Gamemode.TDM.Client.Services
             Game.Player.CanControlCharacter = true;
             Game.PlayerPed.IsPositionFrozen = false;
 
-            Screen.Hud.IsRadarVisible = true;
-            ToggleScoreHud(true);
+            ToggleScoreHud(true);   
 
             API.SetEntityAlpha(Game.PlayerPed.Handle, 150, 0);
             Game.PlayerPed.IsInvincible = true;

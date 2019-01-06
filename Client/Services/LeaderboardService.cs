@@ -27,15 +27,17 @@ namespace FGMM.Gamemode.TDM.Client.Services
 
         public LeaderboardService(ILogger logger, IEventManager events, IRpcHandler rpc, ITickManager tickManager) : base(logger, events, rpc, tickManager)
         {
-            LeaderboardSC = new Scaleform("mp_big_message_freemode");
-            Rpc.Event(ServerEvents.MissionEnded).On(OnMissionEnded);
-            Rpc.Event(ServerEvents.MissionStarted).On(OnMissionStarted);
-            
+            LeaderboardSC = new Scaleform("mp_big_message_freemode");           
             TickManager.Attach(LeaderboardTick);
         }
 
-        private void OnMissionStarted(IRpcEvent obj)
+        public async Task Show()
         {
+            Result result = await Rpc.Event(TDMEvents.GetResult).Request<Result>();
+            await UpdateLeaderboard(result);
+            ShowLeaderboard = true;
+
+            await BaseScript.Delay(10000);
             ShowLeaderboard = false;
         }
 
@@ -43,21 +45,14 @@ namespace FGMM.Gamemode.TDM.Client.Services
         {
             while (!LeaderboardSC.IsLoaded)
                 await BaseScript.Delay(100);
-            LeaderboardSC.CallFunction("SHOW_MISSION_PASSED_MESSAGE", result.Won? "Winner" : "Loser", "", 100, true, 0, true);
+            LeaderboardSC.CallFunction("SHOW_MISSION_PASSED_MESSAGE", result.Won ? "Winner" : "Loser", "", 100, true, 0, true);
         }
 
         private async Task LeaderboardTick()
         {
             if (ShowLeaderboard)
                 LeaderboardSC.Render2D();
+            await Task.FromResult(0);
         }
-
-        private async void OnMissionEnded(IRpcEvent rpc)
-        {
-            Result result = await Rpc.Event(TDMEvents.GetResult).Request<Result>();
-            UpdateLeaderboard(result);
-            ShowLeaderboard = true;
-        }
-
     }
 }

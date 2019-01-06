@@ -29,8 +29,11 @@ namespace FGMM.Gamemode.TDM.Server.Controllers
 
         private void OnResultRequested(IRpcEvent rpc)
         {
-            Player player = new PlayerList()[rpc.Client.Handle];
+            Player player = new PlayerList()[rpc.Client.Handle];            
+            if (!Results.ContainsKey(player))
+                return;
             Results[player].Won = TeamList.GetPlayerTeam(player) == TeamList.GetWinningTeam();
+            Logger.Debug($"{player.Name} requested results. Team: {TeamList.GetPlayerTeam(player).Name} | winning team: {TeamList.GetWinningTeam().Name} | Won?: {Results[player].Won}");
             rpc.Reply(Results[player]);
         }
 

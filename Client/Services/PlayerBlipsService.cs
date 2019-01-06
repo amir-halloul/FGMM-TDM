@@ -5,6 +5,7 @@ using FGMM.SDK.Client.Services;
 using FGMM.SDK.Core.Diagnostics;
 using CitizenFX.Core;
 using CitizenFX.Core.Native;
+using System;
 
 namespace FGMM.Gamemode.TDM.Client.Services
 {
@@ -33,7 +34,7 @@ namespace FGMM.Gamemode.TDM.Client.Services
             foreach(Player player in new PlayerList())
             {
                 if (player == Game.Player)
-                    continue;
+                    continue;        
 
                 int playerTeam = API.GetPlayerTeam(player.Handle);               
                 
@@ -74,13 +75,13 @@ namespace FGMM.Gamemode.TDM.Client.Services
             {
                 if (player == Game.Player)
                     continue;
-
+               
                 int playerTeam = API.GetPlayerTeam(player.Handle);
 
                 Blip blip = new Blip(API.GetBlipFromEntity(player.Character.Handle));
                 blip?.Delete();
 
-                if(playerTeam != -1 && player.IsAlive)
+                if(playerTeam != -1)
                 {
                     blip = new Blip(API.AddBlipForEntity(player.Character.Handle));
                     blip.Sprite = BlipSprite.Enemy;
